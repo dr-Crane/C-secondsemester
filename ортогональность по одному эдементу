@@ -1,0 +1,39 @@
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#define ul unsigned long
+
+struct Interval
+{
+    ul long vec;
+    ul long dnc;
+};
+
+int weightOfVector(ul vec) {
+    int weight = 0;
+    while(vec) {
+        weight++;
+        vec = vec & (vec-1);
+    }
+    return weight;
+}
+
+bool isOneOrthogonal(struct Interval u, struct Interval v) {
+    ul tmpUV, tmpU, tmpV;
+    tmpUV = v.dnc | u.dnc;
+    tmpU = u.vec | tmpUV;
+    tmpV = v.vec | tmpUV;
+    if (weightOfVector(tmpU ^ tmpV) == 1) return true;
+    return false;
+}
+
+
+int main() {
+    struct Interval I;
+    struct Interval G;
+    G.vec = 100;
+    G.dnc = 412;
+    I.vec = 98;
+    I.dnc = 412;
+    printf("%d", isOneOrthogonal(I, G));
+}
