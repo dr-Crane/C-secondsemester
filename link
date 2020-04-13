@@ -1,0 +1,123 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+
+
+struct Node{
+    char word[40];
+    int count;
+    struct Node *next;
+};
+typedef Node *PNode;
+PNode head = NULL;
+
+// Создаёт новый узел
+//PNode CreateNode (char NewWord[]){
+//    PNode NewNode = (struct Node*) malloc(sizeof(struct Node));
+//    *PNode NewNode = (*PNode) malloc(sizeof(Node));
+//    *PNode NewNode = (*PNode) malloc(sizeof(PNode));
+//    Node *NewNode = (Node *) malloc(sizeof(Node));
+//    strcpy(NewNode->word, NewWord);
+//    NewNode->count=1;
+//    NewNode->next=NULL;
+//    return NewNode;
+//}
+
+PNode Create_Node(char NewWord[])
+{
+    PNode NewNode = malloc(sizeof(struct Node));
+    int length = strlen(NewWord) + 1;
+    char *str = malloc(sizeof(char) * length);
+    strcpy(str, NewWord);
+    NewNode->word = str;
+    NewNode->count = 1;
+    NewNode->next = NULL;
+    return NewNode;
+}
+
+//Ставит в начало списка
+//void AddFirst(PNode &head, PNode NewNode){
+//    NewNode->next=head;
+//    head=NewNode;
+//}
+
+void addFirst(PNode &head, PNode NewNode)
+{
+    NewNode->next = head;
+    head = NewNode;
+}
+
+//Ставит после определённого элемента
+void AddAfter(PNode p, PNode NewNode){
+    NewNode->next=p->next;
+    p->next=NewNode;
+}
+
+//Ставит в конец списка
+void AddLast(PNode &head, PNode NewNode){
+PNode q=head;
+if(head==null){
+AddFirst(head, NewNode);
+return;
+}
+while(q->next) q = q->next;
+AddAfter(q, NewNode);
+}
+
+//Ставит перед определённым элементом
+void AddBefore(PNode &head, PNode p, PNode NewNode){
+PNode q=head;
+if(head==p){
+AddFirst(head, NewNode);
+return;
+}
+while(q&&q->next!=p){
+q = q->next;
+}
+if(q){
+AddAfter(q, NewNode);
+}
+}
+
+//Поиск узла в списке
+PNode Find(PNode head, char NewWord[]){
+    PNode q=head;
+    while (q&&strcmp(q->word, NewWord)) q=q->next;
+    return q;
+}
+
+//Возвращает адрес узла перед которым нужно вставить слово
+PNode FindPlace(PNode head, PNode NewWord[]){
+    PNode q=head;
+    while (q&&(strcmp(q->word, NewWord)>0)) q=q->next;
+    return q;
+}
+
+void main(){
+    PNode head = NULL, p , where;
+    FILE *in, *out;
+    char word[80];
+    int n;
+    in = fopen("input.data", "r");
+    while (1){
+        n = fscanf(in, "%s", word);
+        if(n<=0) break;
+        p = Find(head, word);
+        if(p!=NULL) p->count++;
+        else {
+            p= CreateNode(word);
+            where = FindPlace(head, word);
+            if(!where) AddLast(head, p);
+            else AddBefore(head, where, p);
+        }
+    }
+    fclose(in);
+    out = fopen("output.data" , "w");
+    p = head;
+    while (p){
+        fprintf(out,"%-20s\t%d\n", p->word, p->count);
+        p = p->next;
+    }
+    fclose(out);
+}
