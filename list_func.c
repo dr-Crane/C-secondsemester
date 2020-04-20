@@ -54,14 +54,15 @@ int main(){
     struct point *ptrIx = NULL;
     head = el_a;
     ptrIx = head;
+    
+    ptrIx = addToHead(head, 2 , 6);
 
     while (ptrIx) {
         printf("point(%d,%d)  ", ptrIx->x, ptrIx->y);
         ptrIx = ptrIx->next;
     }
 
-    ptrIx = addToHead(head, 2 , 6);
-    printf("\npoint(%d,%d)" , ptrIx->x, ptrIx->y);
+
 }
 
 
