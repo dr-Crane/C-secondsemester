@@ -36,8 +36,6 @@ void printFile(FILE *input){
         printf("%c",n);
     }
     printf("\n");
-//    fclose(input);
-
 }
 
 int main()
