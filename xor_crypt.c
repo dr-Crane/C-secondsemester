@@ -1,32 +1,74 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <stdbool.h>
 
-char *crypt(char *sent , int key){
+bool chek (FILE *first, FILE *second){
+    char a,b;
+    if ((first) && (second)) {
+        while ((a = fgetc(first)) == (b = fgetc(second))) {
+            if (((a = fgetc(first)) != EOF) && ((b = fgetc(second)) != EOF))
+                return true;
+        }
+        return false;
+    }
+}
 
-    unsigned int sent_len = strlen(sent);
-    char *text = (char*) malloc(sent_len+1);
-    if(text == NULL) return NULL;
-    text[sent_len] = '\0';
-    for(int i=0 ; i<strlen(sent) ; i++)  text[i] = sent[i] ^ key;
-    return text;
+void crypt(FILE *input, FILE *output, int key ){
+    char n;
+    while(0==feof(input))
+    {
+        int k = fscanf(input,"%c",&n);
+        if (k == EOF) break;
+        n = n ^ key;
+        fprintf(output, "%c", n );
+    }
+    fclose(output);
 
 }
 
-int main(){
 
-    char sent[] = "Hello, world!";
-    for(int i=0; i<strlen(sent); i++) printf("%c", sent[i]);
-    printf("\n");
-    int key = 5;
-    char *text = crypt(sent , key);
-    if(text == NULL){
-        printf("ERROR_1");
-        return 0;
+
+void printFile(FILE *input){
+    char n;
+    while(0==feof(input))
+    {
+        int t = fscanf(input,"%c",&n);
+        if (t == EOF) break;
+        printf("%c",n);
     }
-    for(int i=0; i<strlen(text); i++) printf("%c", text[i]);
     printf("\n");
-    char *decrypt = crypt(text, key);
-    for(int i=0; i<strlen(decrypt); i++) printf("%c", decrypt[i]);
+//    fclose(input);
 
+}
+
+int main()
+{
+    int key;
+    printf("Enter a key (it must be num):");
+    scanf("%d", &key );
+
+    FILE *sent=fopen("input.txt","r");
+    FILE *out_w=fopen("output.txt","w");
+    FILE *dcrypt_w = fopen("decrypt.txt", "w");
+
+    printFile(sent);
+    rewind(sent);
+
+    crypt(sent, out_w, key);
+    rewind(sent);
+
+    FILE *out_r=fopen("output.txt","r");
+    printFile(out_r);
+    rewind(out_r);
+
+    crypt(out_r, dcrypt_w, key);
+    FILE *dcrypt_r = fopen("decrypt.txt", "r");
+    printFile(dcrypt_r);
+    rewind(dcrypt_r);
+
+    int j = chek(dcrypt_r, sent);
+
+    if (j) printf("True");
+    else printf("False");
+
+    return 0;
 }
