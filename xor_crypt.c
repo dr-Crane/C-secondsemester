@@ -3,24 +3,6 @@
 #include <stdlib.h>
 
 /*
- * Функция записи строки в файл. В параметрах передаём адрес файла для записи (если файл не существует то создаёт файл)
- * и строку для записи. В случае, если строки нет, возвращает 0, в случае успеха 1.
- */
-int WriteIntoFile(char *file, char *arr)
-{
-    if(arr==NULL) return 0;
-    FILE *output = fopen(file, "w");
-    char n;
-    for(int i =0 ; i<strlen(arr); i++)
-    {
-        n = arr[i];
-        fprintf(output, "%c", n );
-    }
-    fclose(output);
-    return 1;
-}
-
-/*
  * Функция для шифрования текста. Возвращает указатель на массив (шифротекст). В качестве параметров передаются
  * два массива типа char. В первом содержится строка, которую нужно зашифровать, во втором ключ. Шифрование производитя
  * по следующей схеме:
@@ -30,25 +12,29 @@ int WriteIntoFile(char *file, char *arr)
  * 4) Если не достигли конца строки - переходим к пункту (1)
  * В случае если строка (или ключ) пустая (длина слова или ключа равны 0) возвращает NULL.
  */
-char *CryptXOR(char *str, char *key)
+void CryptXOR(char *input_file, char *key, char *out_file)
 {
-    char elem;
-    if(strlen(str)==0) return NULL;
-    if(strlen(key)==0) return NULL;
-    char *arr = (char*)malloc(sizeof(char)*strlen(str)+1);
-    if(arr==NULL) return NULL;
-    arr[strlen(str)] = '\0';
-    for(int i=0; i<strlen(str); i++)
+    FILE *first_file = fopen(input_file, "r");
+    FILE *second_file = fopen(out_file, "w");
+    if(second_file&&first_file==NULL) return;
+
+    char n;
+
+    while(0==feof(first_file))
     {
-        elem = str[i];
-        for(int j =0; j<strlen(key); j++)
+        int k = fscanf(first_file,"%c",&n);
+        if (k == EOF) break;
+        printf("%c", n);
+        for(int i=0; i<strlen(key); i++)
         {
-            elem = elem^key[j];
+            n = n ^ key[i];
         }
-        arr[i] = elem;
+        fprintf(second_file, "%c", n );
     }
-    return arr;
+    printf("\n");
+    fclose(second_file);
 }
+
 
 /*
  * Сравнивает два файла типа .txt на эквивалентность. В случае если оди (или оба) файла не существуют, то возвращает -1.
@@ -70,32 +56,24 @@ int CompareFILES(char *File1, char *File2){
 
 int main()
 {
-    char key[] = "jfalsdkjdafdf";
-    char string[] ="Hello world! It's me, again.";
+    char key[] = "12ad32";
 
- Процесс шифрования текста.
-    char *result = CryptXOR(string, key);
-    printf("Chyphertext: ");
-    for(int i=0; i<strlen(result); i++) printf("%c", result[i]);
-
-    printf("\n");
-
-// Дешифровка шифротекста.
-    result = CryptXOR(result, key);
-    printf("Deshipherment: ");
-    for(int i=0; i<strlen(result); i++) printf("%c", result[i]);
-
-    printf("\n");
+// Шифрование
+    CryptXOR("inpt_test.txt", key, "test_output.txt");
+// Дешифровка
+    CryptXOR("test_output.txt", key, "scnd_out.txt");
+// Проверка на эквивалентность
 
 /*
- * В качестве аргументов передаём адреса файлов.Т.к. в моём примере файлы расположены там же, где находится исполняемый
+ * В качестве аргументов передаём адреса файлов. Т.к. в моём примере файлы расположены там же, где находится исполняемый
  * файл мне достаточно указать их имена. Для того, чтобы проверить случай, когда один из файлов не существует, достаточно
  * указать не существующее имя файла.
  */
-    int for_c = CompareFILES("input.txt", "output.txt");
-    if(for_c==-1) printf("There are no file");
-    if(for_c==1) printf("They are equal");
-    if(for_c==0) printf("They are not equal");
+
+//    int for_c = CompareFILES("input.txt", "output.txt");
+//    if(for_c==-1) printf("There are no file");
+//    if(for_c==1) printf("They are equal");
+//    if(for_c==0) printf("They are not equal");
 
 
     return 0;
