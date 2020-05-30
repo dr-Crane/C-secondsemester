@@ -25,17 +25,16 @@ unsigned char *give_memory(int num)
 unsigned char *fill_vec_by_arr(char *str)
 {
     int string_len = strlen(str);
-    unsigned char *arr = give_memory(string_len);
-    if(!arr) return NULL;
     int current = 0;
-    for(int i=0;(string_len-i-1)>=0; i++)
+    unsigned char *arr = give_memory(string_len);
+    for(int i=0; i<(((string_len-1)/8)+1); i++)
     {
         unsigned char mask = 1;
-        for (int j=0; (j<8)&&(current<string_len); j++)
+        for(int j=0; (j<8)&&(current<string_len); j++)
         {
-            if(str[string_len-i-1]!='0')
+            if(str[current]!='0')
             {
-                arr[(((string_len-1)/8)+1)-1-i] = arr[(((string_len-1)/8)+1)-i-1]|mask;
+                arr[i] = arr[i]|mask;
             }
             mask = mask<<1;
             current++;
@@ -44,18 +43,30 @@ unsigned char *fill_vec_by_arr(char *str)
     return arr;
 }
 
-//void showvec(unsigned char *arr)
-//{
-//    int arr_len = strlen(arr);
-//    for(int i=0; i<arr_len; i++)
-//    {
-//        for(int j=0; j)
-//    }
-//}
+void showvec(unsigned char *arr, int len_of_string)
+{
+    int arr_len = strlen(arr);
+    int current =0;
+    for(int i=0; i<arr_len; i++)
+    {
+        unsigned char mask = 1;
+        for(int j=0; j<8&&(current<len_of_string); j++)
+        {
+            if(arr[i] == (arr[i]|mask)) printf("1");
+            else printf("0");
+            current++;
+            mask = mask<<1;
+        }
+
+    }
+}
 
 int main()
 {
-    char arr[] = "111111111111111111111111111111111111";
+    char arr[] = "1010010100010100101010100101011010010100101";
+
+    unsigned char *vec = fill_vec_by_arr(arr);
+    showvec(vec, strlen(arr));
 
     return 0;
 }
