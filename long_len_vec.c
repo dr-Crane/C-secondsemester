@@ -10,6 +10,7 @@
  */
 unsigned char *give_memory(int num)
 {
+    if(num==0) return 0;
     unsigned char *arr = (unsigned char*) malloc(sizeof(unsigned char)*(((num-1)/8)+1));
     if(!arr) return NULL;
     arr[(((num-1)/8)+1)] = '\0';
@@ -25,6 +26,7 @@ unsigned char *give_memory(int num)
  */
 unsigned char *fill_vec_by_arr(char *str)
 {
+    if(str==NULL) return NULL;
     int string_len = strlen(str);
     int current = 0;
     unsigned char *arr = give_memory(string_len);
@@ -46,11 +48,12 @@ unsigned char *fill_vec_by_arr(char *str)
 
 
 /*
- * Конвертируем вектор (массив) в строку . Алгоритм обработки тот же самый, что был показан выше. Рассматриваем
+ * Конвертируем вектор в строку . Алгоритм обработки тот же самый, что был показан выше. Рассматриваем
  * бинарную составляющую каждой ячейки и в заисимости от состояния бита записываем всё в массив.
  */
 char *vec_to_arr(unsigned char *arr, int len_of_string)
 {
+    if(arr==NULL) return NULL;
     char *string = (char*) malloc(len_of_string+1);
     if(!string) return NULL;
     int current=0;
@@ -68,19 +71,89 @@ char *vec_to_arr(unsigned char *arr, int len_of_string)
     }
     return string;
 }
+/*
+ *  Инвертация вектора. Сначала рассматриваем те ячейки,  которые полостью заполнены, а после инвертируем полседнюю.
+ */
+unsigned char *invert_vec(unsigned char *vec, int vec_len)
+{
+    if(!vec||(vec_len==0)) return NULL;
+    int filled_one = (vec_len / 8);
+    for (int  i = 0; i < filled_one; i++)
+    {
+        vec[i] = ~vec[i];
+    }
+    unsigned char mask = 1;
+    for (int i=0; i<8; i++)
+    {
+        vec[filled_one] = vec[filled_one] ^ mask;
+        mask = mask<<1;
+    }
+
+    return vec;
+}
+
+/*
+ * Сдвиг влево.
+ * Алгоритм следующий:
+ * 1)
+ */
+unsigned char *left_shift(unsigned char *vec, int len, int shift)
+{
+    if((len==0)||(shift==0)||(!vec)) return NULL;
+
+    unsigned char space = 0;
 
 
+    return vec;
+}
+
+void show_arr(char *string, int string_len)
+{
+    if((string_len==0)||(string==NULL)) return;
+    for(int i=0; i<string_len; i++)
+    {
+        if(string[i]==0)
+        {
+            for(int i=0; i<8; i++) printf("0");
+        }
+        else printf("%c", string[i]);
+    }
+    printf("\n");
+}
 
 int main()
-{
-    char arr[] = "1010010100010100101010100101011010010100101";
-
+{               // Тестовый пример. Длина строки 43
+    char arr[] = "1111111111111111111111111111111111111111111";
+//                1111111111111111111111111111111111111111111
     unsigned char *vec = fill_vec_by_arr(arr);
 
-    char *string = vec_to_arr(vec, strlen(arr));
+/*
+ *  Пример для vec_to_arr
+ */
+    printf("Vector:  ");
+    char *string = vec_to_arr(vec, 43);
+    show_arr(string, 43);
 
-    for(int i=0; i<strlen(arr); i++)
-        printf("%c", string[i]);
+
+/*
+ *  Example for left shift
+ */
+//    unsigned char *copy = vec;
+//    printf("Lft shft:");
+
+
+
+/*
+ *  Пример для inverted
+ */
+    unsigned char *copy = vec;
+    copy = invert_vec(copy, 43);
+    printf("Inverted:");
+    string = vec_to_arr(copy, 43);
+    show_arr(string, 43);
+
+
+
 
     return 0;
 }
