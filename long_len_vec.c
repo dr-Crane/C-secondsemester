@@ -1,44 +1,28 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
+#include <stdlib.h>
 
 /*
- * Выделяю память и зануляю все разряды.
- * К примеру:
- * Необходимо 100 разрядов. (99/8)+1 = 13 (берём целочисленно),
- * поэтому будет выделено 13 ячеек (элементов массива где каждая имеет 8 бит).
+ * Функция конвертирует строку в булев вектор. Запись ведём справа налево.
  */
-unsigned char *give_memory(int num)
+unsigned char *str_to_vec(char *str)
 {
-    if(num==0) return 0;
-    unsigned char *arr = (unsigned char*) malloc(sizeof(unsigned char)*(((num-1)/8)+1));
-    if(!arr) return NULL;
-    arr[(((num-1)/8)+1)] = '\0';
-    for(int i=0; i<(((num-1)/8)+1); i++)
-    {
-        arr[i] = 0;
-    }
-    return arr;
-}
-/*
- * Заполняем массив (вектор) нужным нам образом. В каждой ячейки отсчёт ведём справа налево. Во втором цикле составное условие,
- * поэтому цикл выполняется либо до тех пор пока j<8 или пока не закончится строка.
- */
-unsigned char *fill_vec_by_arr(char *str)
-{
-    if(str==NULL) return NULL;
-    int string_len = strlen(str);
+    if(!str) return NULL;
+    unsigned int len_str = strlen(str);
     int current = 0;
-    unsigned char *arr = give_memory(string_len);
-    for(int i=0; i<(((string_len-1)/8)+1); i++)
+    unsigned int cells = ((len_str-1)/8)+1;
+    unsigned char *arr = (unsigned char*)malloc(sizeof(unsigned char)*cells);
+    if(!arr) return NULL;
+    for(int i=0; i<cells; i++)
+    {
+        arr[i]=0;
+    }
+    for(int i=0; i<cells; i++)
     {
         unsigned char mask = 1;
-        for(int j=0; (j<8)&&(current<string_len); j++)
+        for(int j=0; j<8&&(current<len_str); j++) // Составное условие, current<len_str на случай елси len_str%8!=0
         {
-            if(str[current]!='0')
-            {
-                arr[i] = arr[i]|mask;
-            }
+            if(str[current]!='0') arr[i] = arr[i]|mask;
             mask = mask<<1;
             current++;
         }
@@ -46,114 +30,126 @@ unsigned char *fill_vec_by_arr(char *str)
     return arr;
 }
 
-
 /*
- * Конвертируем вектор в строку . Алгоритм обработки тот же самый, что был показан выше. Рассматриваем
- * бинарную составляющую каждой ячейки и в заисимости от состояния бита записываем всё в массив.
+ * Функция конвертация вектора в строку. В параметры передаём сам вектор и его длину.
  */
-char *vec_to_arr(unsigned char *arr, int len_of_string)
+char *vec_to_str(unsigned char *vec, int len_vec)
 {
-    if(arr==NULL) return NULL;
-    char *string = (char*) malloc(len_of_string+1);
-    if(!string) return NULL;
-    int current=0;
-    string[len_of_string] = '\0';
-    for(int i=0; i<strlen(arr); i++)
+    if(!vec||len_vec==0) return NULL;
+    int current = 0;
+    char *arr = (char*) malloc(len_vec+1);
+    if(!arr) return NULL;
+    arr[len_vec] = '\0';
+    for(int i=0; i<((len_vec-1)/8)+1; i++)
     {
-        unsigned char mask = 1;
-        for(int j=0; j<8&&(current<len_of_string); j++)
+        unsigned char mask =1;
+        for(int j=0; j<8&&(current<len_vec); j++)
         {
-            if(arr[i]==(arr[i]|mask)) string[current]='1';
-            else string[current]='0';
-            current++;
+            if(vec[i]==(vec[i]|mask)) arr[current]='1'; // Используем маску и в зависимости о трезультата заполняем
+            else arr[current] = '0';                    // arr. Алгоритм тот же, что использовался в str_to_vec()
             mask = mask<<1;
+            current++;
         }
     }
-    return string;
+    return arr;
 }
-/*
- *  Инвертация вектора. Сначала рассматриваем те ячейки,  которые полостью заполнены, а после инвертируем полседнюю.
- */
-unsigned char *invert_vec(unsigned char *vec, int vec_len)
+
+void show_vec(unsigned char *vec, int len_vec)
 {
-    if(!vec||(vec_len==0)) return NULL;
-    int filled_one = (vec_len / 8);
-    for (int  i = 0; i < filled_one; i++)
+    if(!vec||len_vec==0) return;
+    char *arr = vec_to_str(vec, len_vec);
+    for(int i=0; i<45; i++) printf("%c", arr[i]);
+    printf("\n");
+}
+
+/*
+ * Функция инвертирует вектор. Сначала инвертируем все заполненные ячейки (cells-1), а после последнюю
+ * используя свойство vec[i]^1=~vec[i].
+ */
+unsigned char *invert_vec(unsigned char *vec, int len_vec)
+{
+    if(!vec||len_vec==0) return NULL;
+    int cells = ((len_vec-1)/8)+1;
+    for(int i=0; i<cells-1; i++)
     {
         vec[i] = ~vec[i];
     }
     unsigned char mask = 1;
-    for (int i=0; i<8; i++)
+    for(int i=0; i<8; i++)
     {
-        vec[filled_one] = vec[filled_one] ^ mask;
+        vec[cells-1] = vec[cells-1]^mask;
         mask = mask<<1;
     }
-
     return vec;
 }
 
 /*
- * Сдвиг влево.
- * Алгоритм следующий:
- * 1)
+ * Функция выполняет логическое сложение.
  */
-unsigned char *left_shift(unsigned char *vec, int len, int shift)
+unsigned char *logic_summ(unsigned char *vec_1, unsigned char *vec_2, int len_1, int len_2)
 {
-    if((len==0)||(shift==0)||(!vec)) return NULL;
-
-    unsigned char space = 0;
-
-
-    return vec;
-}
-
-void show_arr(char *string, int string_len)
-{
-    if((string_len==0)||(string==NULL)) return;
-    for(int i=0; i<string_len; i++)
+    if(!vec_2||!vec_1) return NULL;
+    int cells_1 = ((len_1-1)/8)+1;
+    int cells_2 = ((len_2-1)/8)+1;
+    int max=0, min=0, current=0;
+    if(cells_1>cells_2)
     {
-        if(string[i]==0)
-        {
-            for(int i=0; i<8; i++) printf("0");
-        }
-        else printf("%c", string[i]);
+         max = cells_1;
+         min = cells_2;
+    } else
+    {
+         max = cells_2;
+         min = cells_1;
     }
-    printf("\n");
+    unsigned char *arr = (unsigned char *) malloc(sizeof(unsigned char)*max);
+    for(int i=0; i<max; i++)
+    {
+        arr[i] = 0;
+    }
+    if(!arr) return NULL;
+    for(int i=0; i<min; i++) // Складываю до тех пор пока не закончатся ячейки у меньшего вектора
+    {
+        arr[i] = vec_1[i]|vec_2[i];
+        current++;
+    }
+    if(min == max) return arr;
+    if(cells_1>cells_2)
+    {
+        for(;current<max; current++)
+        {
+            arr[current] = vec_1[current];
+        }
+    } else
+    {
+        for(;current<max; current++)
+        {
+            arr[current] = vec_2[current];
+        }
+    }
+    return arr;
 }
 
 int main()
-{               // Тестовый пример. Длина строки 43
-    char arr[] = "1111111111111111111111111111111111111111111";
-//                1111111111111111111111111111111111111111111
-    unsigned char *vec = fill_vec_by_arr(arr);
+{               // Тестовый пример, длина строки 45
+    char str_1[] = "111111111111111111111111111111111111111111111";
+    char str_2[] = "000000000000000000000000000000000000000000000";
 
-/*
- *  Пример для vec_to_arr
- */
-    printf("Vector:  ");
-    char *string = vec_to_arr(vec, 43);
-    show_arr(string, 43);
+    //Пример использования str_to_vec()
+    unsigned char *vec_1 = str_to_vec(str_1);
+    unsigned char *vec_2 = str_to_vec(str_2);
+    printf("Vector_1:");
+    show_vec(vec_1, 45);
+    printf("Vector_2:");
+    show_vec(vec_2, 45);
 
+    //Пример для invert_vec()
+//    printf("Inverted:");
+//    unsigned char *inverted = invert_vec(vec, 45);
+//    show_vec(inverted, 45);
 
-/*
- *  Example for left shift
- */
-//    unsigned char *copy = vec;
-//    printf("Lft shft:");
+    //Пример для logic_summ()
+//    printf("Log summ:");
+//    unsigned char *l_summ = logic_summ(vec_1, vec_2, 45, 45);
+//    show_vec(l_summ, 45);
 
-
-
-/*
- *  Пример для inverted
- */
-    unsigned char *copy = vec;
-    copy = invert_vec(copy, 43);
-    printf("Inverted:");
-    string = vec_to_arr(copy, 43);
-    show_arr(string, 43);
-
-
-
-
-    return 0;
 }
