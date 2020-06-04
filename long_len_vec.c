@@ -211,6 +211,41 @@ unsigned char *logic_xor(unsigned char *vec_1, unsigned char *vec_2, int len_1, 
     return arr;
 }
 
+/*
+ * Установка k-го разряда.
+ */
+unsigned char *set_1(unsigned char *vec, int vec_len, int k)
+{
+    if(vec_len==0||!vec) return NULL;
+    unsigned char mask = 1;
+    int mod = k%8;
+    int pos = k/8;
+    mask = mask<<mod;// Устанавливаю единицу в k-ый разряд
+    vec[pos]=vec[pos]|mask;
+    return vec;
+}
+
+/*
+ * Сброс k-го разряда.
+ */
+unsigned char *set_0(unsigned char *vec, int vec_len, int k)
+{
+    if(vec_len==0||!vec) return NULL;
+    unsigned char mask = 1;
+    int mod = k%8;
+    int pos = k/8;
+    mask = mask<<mod;// Устанавливаю единицу в k-ый разряд
+    mask = ~mask;    // получаем во всех разрядах единицу кроме k-го
+    vec[pos]=vec[pos]&mask;
+    return vec;
+}
+
+unsigned char *left_shift(unsigned char *vec, int vec_len, int n)
+{
+    if(!vec) return NULL;
+    
+}
+
 int main()
 {               // Тестовый пример, длина строки 45
     char str_1[] = "111111111111111111111111111111111111111111111";
@@ -244,5 +279,16 @@ int main()
 //    unsigned char *l_xor = logic_xor(vec_1, vec_2, 45,45);
 //    show_vec(l_xor, 45);
 
-    
+    // Пример для set_1()
+//    printf("Set one :");
+//    unsigned char *set_one = set_1(vec_1,45,16);
+//    show_vec(set_one, 45);
+
+    // Пример для set_0()
+//    printf("Set zero:");
+//    unsigned char *set_zero = set_0(vec_1,45,16);
+//    show_vec(set_zero, 45);
+
+
+
 }
