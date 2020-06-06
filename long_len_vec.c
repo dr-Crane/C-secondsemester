@@ -96,12 +96,12 @@ unsigned char *logic_summ(unsigned char *vec_1, unsigned char *vec_2, int len_1,
     int max=0, min=0, current=0;
     if(cells_1>cells_2)
     {
-         max = cells_1;
-         min = cells_2;
+        max = cells_1;
+        min = cells_2;
     } else
     {
-         max = cells_2;
-         min = cells_1;
+        max = cells_2;
+        min = cells_1;
     }
     unsigned char *arr = (unsigned char *) malloc(sizeof(unsigned char)*max);
     if(!arr) return NULL;
@@ -240,14 +240,62 @@ unsigned char *set_0(unsigned char *vec, int vec_len, int k)
     return vec;
 }
 
+/*
+ * В left_shift() и right_shift() есть два ключевых момента.
+ * Первый - это цикл, через который я и выполняю сдвиг.
+ * Второй - это рекурсия, в случае если n > 8 я вызову данную функцию заново изменив параметр n
+ */
 unsigned char *left_shift(unsigned char *vec, int vec_len, int n)
 {
-    if(!vec) return NULL;
-    
+    if(!vec||n<0) return NULL;
+    int cells = ((vec_len-1)/8)+1;
+    int shift = 0;
+    if(n > 8)
+    {
+        n = n-8;
+        shift = 8;
+    }
+    else shift = n;
+    unsigned char space = 0;
+    vec[0] = vec[0]<<shift;
+    for(int i=1; i<cells; i++)
+    {
+        space = vec[i];
+        space = space>>(8-shift);
+        vec[i-1] = vec[i-1]|space;
+        vec[i] = vec[i]<<shift;
+    }
+    if(n>8) left_shift(vec, vec_len, n);
+    else return vec;
+}
+
+unsigned char *right_shift(unsigned char *vec, int vec_len, int n)
+{
+    if(!vec||n<0) return NULL;
+    int cells = ((vec_len-1)/8)+1;
+    int shift = 0;
+    if(n > 8)
+    {
+        n = n-8;
+        shift = 8;
+    }
+    else shift = n;
+    unsigned char space = 0;
+    vec[cells-1] = vec[cells-1]>>shift;
+    for(int i=1; i<cells; i++)
+    {
+        space = vec[cells-i-1];
+        space = space<<(8-shift);
+        vec[cells-i] = vec[cells-i]|space;
+        vec[cells-i-1] = vec[cells-1-i]>>shift;
+    }
+    if(n>8) right_shift(vec, vec_len, n);
+    else return vec;
 }
 
 int main()
-{               // Тестовый пример, длина строки 45
+{               // Тестовый пример, длина строки 45 (не считая символа конца строки,
+                // а следовательно и длина вектора тоже 45)
     char str_1[] = "111111111111111111111111111111111111111111111";
     char str_2[] = "000000000000000000000000000000000000000000000";
 
@@ -289,6 +337,16 @@ int main()
 //    unsigned char *set_zero = set_0(vec_1,45,16);
 //    show_vec(set_zero, 45);
 
+    // Пример для left_shift()
+//    printf("L shift :");
+//    unsigned char *l_shifted = left_shift(vec_1, 45, 10);
+//    show_vec(l_shifted,45);
+
+    // Пример для right_shift()
+//    printf("R shift :");
+//    unsigned char *r_shifted = right_shift(vec_1, 45, 18);
+//    show_vec(r_shifted,45);
 
 
+    return 0;
 }
