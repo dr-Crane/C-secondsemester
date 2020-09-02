@@ -418,20 +418,73 @@ struct node *deletePos(struct node *list, int pos)
     }
     return NULL;
 }
+// Функция делит список на два. В первом перечислены уникальные эленменты, во втором оствльные.
+// Возвращает список уникальных элементов. 
+struct node *separate(struct node* list, struct node** other)
+{
+    struct node* space = NULL;
+    struct node* unique = list;
+    list = list->next;
+    unique->next = NULL;
+    struct node* ptr = list;
+    list = addtohead(list, 0); //  Создаю фиктивную голову, чтобы проще было разделить
+    list->next = NULL;
+    list->prev = NULL;
+    ptr->prev = NULL;
+    struct node* u_shift = unique;
+    struct node* o_shift = list;
+    int num = 0;
+    while (ptr)
+    {
+        space = ptr;
+        ptr = ptr->next;
+        space->next = NULL;
+        space->prev = NULL;
+        num = 0;
+        for(struct node* i=unique; i!=NULL; i=i->next)
+        {
+            if((space->key)==(i->key)) num++;
+        }
+        if(num)
+        {
+            o_shift->next = space;
+            space->prev = o_shift;
+            o_shift = o_shift->next;
+        }
+        else
+        {
+            u_shift->next = space;
+            space->prev = u_shift;
+            u_shift = u_shift->next;
+        }
+    }
+    list = deleteHead(list);
+    *(other) = list;
+
+    return unique;
+}
 
 int main()
 {
     struct node *head = NULL;
-
+    head = addtotail(head, 1);
+    head = addtotail(head, 2);
+    head = addtotail(head, 1);
+    head = addtotail(head, 1);
+    head = addtotail(head, 2);
+    head = addtotail(head, 1);
+    head = addtotail(head, 3);
+    head = addtotail(head, 3);
+    head = addtotail(head, 3);
     // tests for addtohead()
-    for(int i=0; i<8; i++)
-    {
-        head = addtohead(head, i);
-    }
-    Printlist(head);
-    printf("\n");
-    revPrntLst(head);
-    printf("\n");
+    // for(int i=0; i<8; i++)
+    // {
+    //     head = addtohead(head, i);
+    // }
+    // Printlist(head);
+    // printf("\n");
+    // revPrntLst(head);
+    // printf("\n");
 
     //tests for addtotail()
 //    for(int i=0; i<5; i++)
@@ -531,10 +584,18 @@ int main()
     // revPrntLst(ptr);
 
 // example for deletePos()
-    struct node *ptr = head;
-    ptr = deletePos(ptr, 4);
-    Printlist(ptr);
-    revPrntLst(ptr);
+    // struct node *ptr = head;
+    // ptr = deletePos(ptr, 4);
+    // Printlist(ptr);
+    // revPrntLst(ptr);
+
+// example for separate()
+    struct node *unique = head;
+    unique = separate(unique, &head);
+    Printlist(unique);
+    revPrntLst(unique);
+    Printlist(head);
+    revPrntLst(head);
 
     return 0;
 }
