@@ -58,7 +58,7 @@ void show_vec(unsigned char *vec, int len_vec)
 {
     if(!vec||len_vec==0) return;
     char *arr = vec_to_str(vec, len_vec);
-    for(int i=0; i<45; i++) printf("%c", arr[i]);
+    for(int i=0; i<len_vec; i++) printf("%c", arr[i]);
     printf("\n");
 }
 
