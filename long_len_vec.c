@@ -240,57 +240,102 @@ unsigned char *set_0(unsigned char *vec, int vec_len, int k)
     return vec;
 }
 
-/*
- * В left_shift() и right_shift() есть два ключевых момента.
- * Первый - это цикл, через который я и выполняю сдвиг.
- * Второй - это рекурсия, в случае если n > 8 я вызову данную функцию заново изменив параметр n
- */
-unsigned char *left_shift(unsigned char *vec, int vec_len, int n)
+unsigned char * left_shift(unsigned char *vec, int vec_len, int n)
 {
-    if(!vec||n<0) return NULL;
     int cells = ((vec_len-1)/8)+1;
-    int shift = 0;
-    if(n > 8)
-    {
-        n = n-8;
-        shift = 8;
-    }
-    else shift = n;
     unsigned char space = 0;
-    vec[0] = vec[0]<<shift;
-    for(int i=1; i<cells; i++)
+    if((vec==NULL)||(vec_len<=0)||(n<=0)) return NULL;
+    if(n<8)
     {
-        space = vec[i];
-        space = space>>(8-shift);
-        vec[i-1] = vec[i-1]|space;
-        vec[i] = vec[i]<<shift;
+        for(int i=0; i<(cells-1); i++)
+        {
+            vec[i] = vec[i]>>n;
+            space = vec[i+1];
+            space = space<<(8-n);
+            vec[i] = vec[i]|space;
+        }
+        vec[cells-1] = vec[cells-1]>>n;
     }
-    if(n>8) left_shift(vec, vec_len, n);
-    else return vec;
+    else
+    {
+        int num = n;
+        int less = 7;
+        while(num>=8)
+        {
+            for(int i=0; i<(cells-1); i++)
+            {
+                vec[i] = vec[i]>>less;
+                space = vec[i+1];
+                space = space<<(8-less);
+                vec[i] = vec[i]|space;
+            }
+            vec[cells-1] = vec[cells-1]>>less;
+            num = num-7;
+        }
+        less = num;
+         for(int i=0; i<(cells-1); i++)
+        {
+            vec[i] = vec[i]>>less;
+            space = vec[i+1];
+            space = space<<(8-less);
+            vec[i] = vec[i]|space;
+        }
+        vec[cells-1] = vec[cells-1]>>less;
+    }
+    
+
+
+    return vec;
 }
+
+
 
 unsigned char *right_shift(unsigned char *vec, int vec_len, int n)
 {
-    if(!vec||n<0) return NULL;
     int cells = ((vec_len-1)/8)+1;
-    int shift = 0;
-    if(n > 8)
-    {
-        n = n-8;
-        shift = 8;
-    }
-    else shift = n;
     unsigned char space = 0;
-    vec[cells-1] = vec[cells-1]>>shift;
-    for(int i=1; i<cells; i++)
+    if((vec==NULL)||(vec_len<=0)||(n<=0)) return NULL;
+    if(n<8)
     {
-        space = vec[cells-i-1];
-        space = space<<(8-shift);
-        vec[cells-i] = vec[cells-i]|space;
-        vec[cells-i-1] = vec[cells-1-i]>>shift;
+        for(int i=(cells-1); i>0; i--)
+        {
+            vec[i] = vec[i]<<n;
+            space = vec[i-1];
+            space = space>>(8-n);
+            vec[i] = vec[i]|space;
+        }
+        vec[0] = vec[0]<<n;
     }
-    if(n>8) right_shift(vec, vec_len, n);
-    else return vec;
+    else
+    {
+        int num = n;
+        int less = 7;
+        while(num>=8)
+        {
+            for(int i=(cells-1); i>0; i--)
+            {
+                vec[i] = vec[i]<<less;
+                space = vec[i-1];
+                space = space>>(8-less);
+                vec[i] = vec[i]|space;
+            }
+            vec[0] = vec[0]<<less;
+            num = num-7;
+        }
+        less = num;
+        for(int i=(cells-1); i>0; i--)
+        {
+            vec[i] = vec[i]<<less;
+            space = vec[i-1];
+            space = space>>(8-less);
+            vec[i] = vec[i]|space;
+        }
+        vec[0] = vec[0]<<less;
+    }
+    
+
+
+    return vec;
 }
 
 int main()
@@ -302,14 +347,14 @@ int main()
     //Пример использования str_to_vec()
     unsigned char *vec_1 = str_to_vec(str_1);
     unsigned char *vec_2 = str_to_vec(str_2);
-    printf("Vector_1:");
-    show_vec(vec_1, 45);
-    printf("Vector_2:");
-    show_vec(vec_2, 45);
+    // printf("Vector_1:");
+    // show_vec(vec_1, 45);
+    // printf("Vector_2:");
+    // show_vec(vec_2, 45);
 
     //Пример для invert_vec()
 //    printf("Inverted:");
-//    unsigned char *inverted = invert_vec(vec, 45);
+//    unsigned char *inverted = invert_vec(vec_1, 45);
 //    show_vec(inverted, 45);
 
     //Пример для logic_summ()
@@ -337,16 +382,15 @@ int main()
 //    unsigned char *set_zero = set_0(vec_1,45,16);
 //    show_vec(set_zero, 45);
 
-    // Пример для left_shift()
-//    printf("L shift :");
-//    unsigned char *l_shifted = left_shift(vec_1, 45, 10);
-//    show_vec(l_shifted,45);
+    // Examples for shifts
 
-    // Пример для right_shift()
-//    printf("R shift :");
-//    unsigned char *r_shifted = right_shift(vec_1, 45, 18);
-//    show_vec(r_shifted,45);
-
+    //for left
+    // unsigned char* shifted = left_shift(vec_1, 45, 10);
+    // show_vec(shifted, 45);
+    
+    //for right
+    // unsigned char *shifted = right_shift(vec_1, 45, 10);
+    // show_vec(shifted, 45);
 
     return 0;
 }
